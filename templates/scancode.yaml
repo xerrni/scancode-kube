@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "scancodeio.labels" . | nindent 4 }}
+    app: {{ include "scancodeio.fullname" . }}-scancode-env
+  name: {{ include "scancodeio.fullname" . }}-scancode-env
+data:
+  SCANCODEIO_ASYNC: "True"
+  SCANCODEIO_DB_HOST:
+    "{{ .Release.Name }}-postgresql.{{- .Release.Namespace }}.svc.cluster.local"
+  SCANCODEIO_REDIS_HOST:
+    "{{ .Release.Name }}-redis-master.{{- .Release.Namespace }}.svc.cluster.local"
+  SCANCODEIO_WORKSPACE_LOCATION: /var/scancodeio/workspace/
+  SCANCODEIO_REQUIRE_AUTHENTICATION: "False"
+  ALLOWED_HOSTS: "*,localhost,127.0.0.1,[::1]"
+  SCANCODEIO_DEBUG: "False"
+  SCANCODEIO_PROCESSES: "2"

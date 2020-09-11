@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "scancodeio.fullname" . }}-test-worker"
+  labels:
+    {{- include "scancodeio.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: apteno/alpine-jq
+      command: ['sh']
+      args:
+      - '-c'
+      - |
+        curl -L -X POST "http://{{ .Release.Name }}-scancodeio-web.{{- .Release.Namespace }}.svc.cluster.local:8000/api/projects/"  \
+        -H "Content-Type: application/json"  \
+        -d '{ "name": "test", "upload_urls": \
+        "https://github.com/curl/curl/releases/download/curl-7_81_0/curl-7.81.0.tar.gz",\
+        "pipeline": "scan_codebase", "execute_now": "true"}' && \
+        sleep 10 && curl "http://{{ .Release.Name }}-scancodeio-web.{{- .Release.Namespace }}.svc.cluster.local:8000/api/projects/?format=json" |\
+        jq '.results[] | select(.name == "test") | select(.runs[0].status == "running")' -e
+  restartPolicy: Never

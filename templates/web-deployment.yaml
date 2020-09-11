@@ -1,0 +1,111 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "scancodeio.fullname" . }}-web
+  labels:
+    {{- include "scancodeio.labels" . | nindent 4 }}
+    app: {{ include "scancodeio.fullname" . }}-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "scancodeio.fullname" . }}-web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ include "scancodeio.fullname" . }}-web
+    spec:
+      initContainers:
+        - name: wait-for-database
+          image: aalexanderr/scancodeio:v30.2.0-onap2
+          env:
+            - name: SCANCODEIO_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: database
+                  name: scancode-secret
+            - name: SCANCODEIO_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: scancode-secret
+            - name: SCANCODEIO_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: scancode-secret
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SECRET_KEY
+                  name: scancode-secret
+          envFrom:
+            - configMapRef:
+                name: {{ include "scancodeio.fullname" . }}-scancode-env
+          command: ['./manage.py', 'wait_for_database']
+      containers:
+        - args:
+            - sh
+            - -c
+            - " ./manage.py migrate && \
+			./manage.py collectstatic --no-input --verbosity 0 --clear && \
+			gunicorn scancodeio.wsgi:application --bind :8000 --timeout 600 --workers 8"
+          env:
+            - name: SCANCODEIO_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: database
+                  name: scancode-secret
+            - name: SCANCODEIO_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: scancode-secret
+            - name: SCANCODEIO_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: scancode-secret
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SECRET_KEY
+                  name: scancode-secret
+          envFrom:
+            - configMapRef:
+                name: {{ include "scancodeio.fullname" . }}-scancode-env
+          image: aalexanderr/scancodeio:v30.2.0-onap2
+          name: {{ include "scancodeio.fullname" . }}-web
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - mountPath: /etc/scancodeio/
+              name: {{ include "scancodeio.fullname" . }}-web-claim
+            - mountPath: /var/scancodeio/workspace/
+              name: {{ include "scancodeio.fullname" . }}-workspace-claim
+      restartPolicy: Always
+      volumes:
+        - name: {{ include "scancodeio.fullname" . }}-web-claim
+          persistentVolumeClaim:
+            claimName: {{ include "scancodeio.fullname" . }}-web-claim
+        - name: {{ include "scancodeio.fullname" . }}-workspace-claim
+          persistentVolumeClaim:
+            claimName: {{ include "scancodeio.fullname" . }}-workspace-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ include "scancodeio.fullname" . }}-web
+  name: {{ include "scancodeio.fullname" . }}-web
+spec:
+  selector:
+    app: {{ include "scancodeio.fullname" . }}-web
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
