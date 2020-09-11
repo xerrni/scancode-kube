@@ -1,0 +1,167 @@
+---
+# Default values for scancodeio.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+scancodeDatabase: scancode-db
+scancodeUsername: scancode-user
+# change default password
+scancodePassword: scancode-pwd
+# change default password
+scancodePostgresPassword: scancode-admin-pwd
+# change default secret key
+scancodeSECRET_KEY: sBWLZ0ryiaO15842p0yMS//Zhh7K66wwxn0MmPLwI7nfRPLe/Y
+# change default password
+scancodeSCANCODEIO_REDIS_PASSWORD: scancode-redis-pwd
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname
+  # template
+  name: ""
+
+securityContext: {}
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+# We usually recommend not to specify default resources and to leave this
+# as a conscious choice for the user. This also increases chances charts
+# run on environments with little resources, such as Minikube.
+# If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary,
+# and remove the curly braces after 'resources:'.
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 100m
+#   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+postgresql:
+  auth:
+    username: scancode-user
+    database: scancode-db
+    existingSecret: scancode-secret
+
+redis:
+  architecture: standalone
+  auth:
+    enabled: true
+    existingSecret: scancode-secret
+    existingSecretPasswordKey: SCANCODEIO_REDIS_PASSWORD
+
+nginx:
+  ## @param extraVolumes Array to add extra volumes
+  ##
+  #  extraVolumes:
+  #    - name: staticsite
+  #      hostPath:
+  #        path: /data/static/
+  #        type: Directory
+  service:
+    type: NodePort
+  extraVolumes:
+    - name: "{{ .Release.Name }}-staticsite"
+      persistentVolumeClaim:
+        claimName: "{{ .Release.Name }}-staticsite"
+  # @param extraVolumeMounts Array to add extra mount
+  #
+  extraVolumeMounts:
+    - mountPath: /static
+      name: "{{ .Release.Name }}-staticsite"
+
+  ## @param initContainers Extra init containers
+  ##
+  initContainers:
+    - name: populate-static
+      image: eeproton/scancodeio_web
+      command: ['/bin/sh']
+      args:
+        - '-c'
+        - "find /static/ -mindepth 1 -maxdepth 1 -type d -delete && \
+          mkdir -p /static/scancodeio /static/scancodeio-static && \
+          cp -r /var/scancodeio/static/ /static/scancodeio && \
+          cp -r /usr/local/lib/python3.9/site-packages/rest_framework/static/ \
+          /static/scancodeio-static && \
+          cp -r \
+          /usr/local/lib/python3.9/site-packages/django/contrib/admin/static/ \
+          /static/scancodeio-static"
+      volumeMounts:
+        - mountPath: /static
+          name: "{{ .Release.Name }}-staticsite"
+
+
+  ## @param serverBlock Custom server block to be added to NGINX configuration
+  serverBlock: |-
+    server {
+      listen 0.0.0.0:8080;
+      root /app;
+      location / {
+        proxy_pass http://{{ .Release.Name }}-scancodeio-web:8000/;
+        proxy_redirect off;
+        client_max_body_size 10G;
+        proxy_read_timeout 600s;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $host:$server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $host;
+      }
+
+      location /static/admin/ {
+        alias /static/scancodeio-static/static/admin/;
+      }
+      location /static/rest_framework {
+        alias /static/scancodeio-static/static/rest_framework;
+      }
+      location /static/ {
+        alias /static/scancodeio/static/;
+      }
+      location /status {
+        stub_status on;
+        access_log   off;
+        allow 127.0.0.1;
+        deny all;
+      }
+    }

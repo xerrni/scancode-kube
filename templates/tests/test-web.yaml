@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "scancodeio.fullname" . }}-test-web"
+  labels:
+    {{- include "scancodeio.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: apteno/alpine-jq
+      command: ['sh']
+      args:
+      - '-c'
+      - |
+        export URL="http://{{ .Release.Name }}-scancodeio-web.{{- .Release.Namespace }}.svc.cluster.local:8000/api/projects/";
+        echo "url: $URL";
+        set -x;
+        sleep 60
+        curl -L -X POST "$URL"  \
+        -H "Content-Type: application/json"  \
+        -d '{ "name": "test2", "pipeline": "scan_codebase", "execute_now": "true"}' |\
+        jq ".uuid" -e > uuid && sleep 10 && curl "${URL}?format=json" |\
+        jq '.results[] | select(.name == "test2") | select(.runs[0].status == "success")' -e && \
+        curl -L -X DELETE "${URL}$(cat uuid | sed 's/\"//g')/"  \
+        -H "Content-Type: application/json"
+
+  restartPolicy: Never

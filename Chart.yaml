@@ -1,0 +1,48 @@
+apiVersion: v2
+name: scancodeio
+description: A Helm chart for Kubernetes deployment of ScanCode.io
+type: application
+
+version: 0.1.0
+appVersion: "30.2.0"
+#kubeVersion: "1.23.3-2+d441060727c463"
+#kubeVersion: ">=1.23.0"
+
+dependencies:
+  - name: nginx
+    repository: https://charts.bitnami.com/bitnami
+    version: 9.x.x
+  - name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 11.x.x
+  - name: redis
+    repository: https://charts.bitnami.com/bitnami
+    version: 16.x.x
+
+keywords:
+  - open source
+  - scancode
+  - license
+  - dependency
+  - filetype
+  - author
+  - extract
+  - licensing
+  - scancode
+  - scanpipe
+  - container
+  - code analysis
+  - docker
+  - vm
+  - virtual machine
+  - pipeline
+  - scancodeio
+  - sbom
+sources:
+  - "https://github.com/nexB/scancode.io/"
+
+maintainers:
+  - email: e.borowski@samsung.com
+    name: Samsung
+  - email: a.mazuruk@samsung.com
+    name: Samsung
