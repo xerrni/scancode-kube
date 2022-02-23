@@ -1,18 +1,123 @@
 ---
-# Default values for scancodeio.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+## @section Global parameters
+## Please, note that this will override the parameters, including dependencies.
+##
+global:
+  ## @param global.imageRegistry Global Docker image registry
+  ##
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  ## e.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  ## @param global.storageClass Global StorageClass for Persistent Volume(s)
+  ##
+  storageClass: ""
 
-replicaCount: 1
+  ## TODO: in bitnami charts this contains info on auth and service for postgres, nothing more for keycloak
+  ## idk if necessary
+  worker:
+    service:
+      ports:
+        worker: ""
 
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  web:
+    asd: dsa
+  #postgresql:
+  #  auth
 
+## @section Common parameters
+##
+
+## @param kubeVersion Override Kubernetes version
+##
+## TODO: idk if necessary
+kubeVersion: ""
+## @param nameOverride String to partially override common.names.fullname template (will maintain the release name)
+##
 nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname template
+##
 fullnameOverride: ""
+## @param clusterDomain Kubernetes Cluster Domain
+##
+clusterDomain: cluster.local
+## @param extraDeploy Array of extra objects to deploy with the release (evaluated as a template)
+##
+extraDeploy: []
+## @param commonLabels Add labels to all the deployed resources
+##
+commonLabels: {}
+## @param commonAnnotations Add annotations to all the deployed resources
+##
+commonAnnotations: {}
+## Enable diagnostic mode in the statefulset
+##
+## TODO: will it work with deps? do we need it?
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the statefulset
+  ##
+  command:
+    - sleep
+  ## @param diagnosticMode.args Args to override all containers in the statefulset
+  ##
+  args:
+    - infinity
+
+
+
+# TODO: whole section when official img will be available
+## NexB ScanCode.io image version
+## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
+## @param image.registry ScanCode.io image registry
+## @param image.repository ScanCode.io image repository
+# TODO: tag should be empty, note it will override deault appVersion tag
+## @param image.tag ScanCode.io image tag (immutable tags are recommended)
+## @param image.pullPolicy ScanCode.io image pull policy
+## @param image.pullSecrets Specify image pull secrets
+## @param image.debug Specify if debug values should be set
+##
+image:
+  registry: docker.io
+  repository: aalexanderr/scancodeio
+  tag: v30.2.0-onap3
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## Example:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+  ## Set to true if you would like to see extra information on logs
+  ##
+  # TODO: check how it works in bitnami charts
+  debug: false
+
+
+auth:
+  # TODO: add a job that will create superuser via manage.py
+  createSuperUser: false
+  username: ""
+  password: ""
+  existingSecret: ""
+
+
+containerPorts:
+  web: ""
+  worker: ""
+  redis: ""
+  postgres: 5432
 
 serviceAccount:
   # Specifies whether a service account should be created
