@@ -16,18 +16,6 @@ global:
   ##
   storageClass: ""
 
-  ## TODO: in bitnami charts this contains info on auth and service for postgres, nothing more for keycloak
-  ## idk if necessary
-  worker:
-    service:
-      ports:
-        worker: ""
-
-  web:
-    asd: dsa
-  #postgresql:
-  #  auth
-
 ## @section Common parameters
 ##
 
