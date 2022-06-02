@@ -3,16 +3,17 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-scancodeDatabase: scancode-db
-scancodeUsername: scancode-user
-# change default password
-scancodePassword: scancode-pwd
-# change default password
-scancodePostgresPassword: scancode-admin-pwd
-# change default secret key
-scancodeSECRET_KEY: sBWLZ0ryiaO15842p0yMS//Zhh7K66wwxn0MmPLwI7nfRPLe/Y
-# change default password
-scancodeSCANCODEIO_REDIS_PASSWORD: scancode-redis-pwd
+scancode:
+  database: scancode-db
+  username: scancode-user
+  # change default password
+  password: scancode-pwd
+  # change default password
+  postgresPassword: scancode-admin-pwd
+  # change default secret key
+  SECRET_KEY: sBWLZ0ryiaO15842p0yMS//Zhh7K66wwxn0MmPLwI7nfRPLe/Y
+  # change default password
+  SCANCODEIO_REDIS_PASSWORD: scancode-redis-pwd
 
 replicaCount: 1
 
@@ -27,7 +28,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.

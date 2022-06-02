@@ -1,14 +1,21 @@
 apiVersion: v2
-name: scancodeio-main
-description: Aaaa Helm chart for Kubernetes deployment of ScanCode.io
+name: scancodeio
+description: A Helm chart for Kubernetes deployment of ScanCode.io
 type: application
 
-version: 0.1.1
+version: 0.1.0
 appVersion: "30.2.0"
 
 dependencies:
-  - name: scancodeio
-    repository: file://charts/scancode
+  - name: nginx
+    repository: https://charts.bitnami.com/bitnami
+    version: 9.x.x
+  - name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 11.x.x
+  - name: redis
+    repository: https://charts.bitnami.com/bitnami
+    version: 16.x.x
 
 keywords:
   - open source

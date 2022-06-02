@@ -23,49 +23,49 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
-{{- define "scancodeio.scancode-database" -}}
-{{- if .Values.scancodeDatabase }}
-{{- .Values.scancodeDatabase | trunc 63 | trimSuffix "-" }}
+{{- define "scancodeio.database" -}}
+{{- if .Values.database }}
+{{- .Values.database | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- printf "scancode-db" }}
 {{- end }}
 {{- end }}
 
-{{- define "scancodeio.scancode-username" -}}
-{{- if .Values.scancodeUsername }}
-{{- .Values.scancodeUsername | trunc 63 | trimSuffix "-" }}
+{{- define "scancodeio.username" -}}
+{{- if .Values.username }}
+{{- .Values.username | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- printf "scancode-user" }}
 {{- end }}
 {{- end }}
 
-{{- define "scancodeio.scancode-password" -}}
-{{- if .Values.scancodePassword }}
-{{- .Values.scancodePassword | trunc 63 | trimSuffix "-" }}
+{{- define "scancodeio.password" -}}
+{{- if .Values.password }}
+{{- .Values.password | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- randAlphaNum 32 | b64enc | quote }}
 {{- end }}
 {{- end }}
 
-{{- define "scancodeio.scancode-postgres-password" -}}
-{{- if .Values.scancodePostgresPassword }}
-{{- .Values.scancodePostgresPassword | trunc 63 | trimSuffix "-" }}
+{{- define "scancodeio.postgres-password" -}}
+{{- if .Values.postgresPassword }}
+{{- .Values.postgresPassword | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- randAlphaNum 32 | b64enc | quote }}
 {{- end }}
 {{- end }}
 
-{{- define "scancodeio.scancode-SECRET_KEY" -}}
-{{- if .Values.scancodeSECRET_KEY }}
-{{- .Values.scancodeSECRET_KEY | trunc 63 | trimSuffix "-" }}
+{{- define "scancodeio.SECRET_KEY" -}}
+{{- if .Values.SECRET_KEY }}
+{{- .Values.SECRET_KEY | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- randAlphaNum 32 | b64enc | quote }}
 {{- end }}
 {{- end }}
 
-{{- define "scancodeio.scancode-SCANCODEIO_REDIS_PASSWORD" -}}
-{{- if .Values.scancodeSCANCODEIO_REDIS_PASSWORD }}
-{{- .Values.scancodeSCANCODEIO_REDIS_PASSWORD | trunc 63 | trimSuffix "-" }}
+{{- define "scancodeio.SCANCODEIO_REDIS_PASSWORD" -}}
+{{- if .Values.SCANCODEIO_REDIS_PASSWORD }}
+{{- .Values.SCANCODEIO_REDIS_PASSWORD | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- randAlphaNum 32 | b64enc | quote }}
 {{- end }}
